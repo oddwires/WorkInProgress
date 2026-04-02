@@ -1,0 +1,48 @@
+alarm:status:
+alarm:mode:
+alarm:duration:15 mins
+setup:location:Name me
+setup:routerIP:
+setup:localIP:
+setup:diskused:
+setup:disk%:
+setup:disktotal:
+setup:memory:
+setup:hardware:
+setup:uptime:
+email:server:smtp.gmail.com
+email:port:587
+email:sender:
+heat:mode:Heat and Water
+zcon:alarm:Front door:on:on:on:11:false:0:0
+zcon:alarm:Back door:on:on:on:5:false:0:0
+zcon:alarm:Kitchen PIR:on:off:off:9:false:0:0
+zcon:Tamper:Tamper loop:Off:Off:Off:12:false:0:0
+rcon:Office:Tasmota (WiFi) device:WiFi:-:100:Off:On:Outlet
+rcon:Office:Radio control device:RF:-:100:Off:On:Outlet
+rcon:Office:Blue light:WiFi:-:100:Off:On:Outlet
+rcon:Office:Green light:WiFi:-:101:Off:On:Outlet
+rcon:Office:Yellow light:WiFi:-:102:Off:On:Outlet
+rcon:Office:Red light:WiFi:-:103:Off:On:Outlet
+rcon:Kitchen:PC:WiFi:-:104:Off:On:Outlet
+rdtr:Downstairs:Entrance:0:On:Hi:Low
+rdtr:Downstairs:Kitchen:0:On:26:20
+rdtr:Downstairs:Living room:4:On:Hi:low
+rdtr:Upstairs:Landing:5:On:Hi:low
+rdtr:Upstairs:Main bedroom:6:On:Hi:low
+rdtr:Upstairs:Back bedroom:1:On:Hi:low
+cron:Wake up:0:8:*:*:6-7:5:On
+cron:Wake up:0:7:*:*:1-5:5:On
+cron:Wake up:0:9:*:*:*:5:Off
+cron:Night time:0:21:*:*:*:12:On
+cron:Night time:0:21:*:*:*:13:On
+cron:Night time:0:21:*:*:*:14:Off
+cron:Night time:0:21:*:*:*:15:Off
+user:admin:
+user:Pugh:
+user:Pugh:
+user:Barney:
+user:McGrew:
+user:Cuthbert:
+user:Dibble:
+user:Grubb:
