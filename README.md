@@ -10,3 +10,4 @@ This repo is about getting the build working again.
 Key differences...
 
 1) Based on [Homebridge Raspberry Pi Image](https://homebridge.io/raspberry-pi-image) (Debian Trixie)
+2) Moved all log file into /var/log/ and updated Samba data share to point to it.
