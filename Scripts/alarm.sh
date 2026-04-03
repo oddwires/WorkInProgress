@@ -55,7 +55,7 @@ PreviousValue=7                                                 # on / off - pre
 CurrentValue=8                                                  # on / off - current state of circuit
 declare -a zcon=()                                              # array to store alarm zone configuration details
 
-# Array to store user data.                                     
+# Array to store user data.
 # Note: first element is always used to store the email account details. This means they don't get published in the status file.
 # 4 x elements per record defined as...
 declare -a user=()
@@ -87,7 +87,7 @@ declare -a rdtr=()
 # Define look up tables...
 # Tasks are passed back as an index number. This array expands the number into a string to use in the cron job.
  declare -a cmnd=()
- 
+
  declare -a AllPorts=('4' '18' '17' '23' '9' '25' '10' '11' '8' '7')          # All Broadcom GPIO port numbers
 
 # List of anodes used by the 12 input circuits. There is no logic behind these - its just the way the PCB is constructed.
@@ -116,202 +116,89 @@ heatmode='Heat and Water'                    # Default value. NOTE: Hardware pow
 Homebridge_Export()
 #################################################################################################################################
 #                                                                                                                               #
-# Function to export all currently configured devices to HomeKit accessories                                                    #
+# Function to export all currently configured devices to Homebridge                                                             #
 #                                                                                                                               #
 #################################################################################################################################
-{  
-   PathToHAPNodeJS=$(sudo find / -type d -name "HAP-NodeJS")                               # don't really know where the install has
-   PathToConfigFiles=$(sudo find / -type d -name "ConfigFiles")                            # been run from so find one of the source files
-   AccessoriesPath=$PathToHAPNodeJS"/src/accessories/"
-   # extract MAC address details for the Homekit bridge...
-   BridgeMAC=$(sudo cat $PathToHAPNodeJS/src/BridgedCore.ts | grep -n'username:' | awk -F'"' '{print $2}')
-   # extract first 5 digits from the bridge MAC address. This will be used as the base MAC for all our accessories...
-   BaseMAC=${BridgeMAC::-2}
-   
-   echo HAP-NodeJS install found at: $PathToHAPNodeJS
-   echo Source config files found at: $PathToConfigFiles
-   echo Path to accessory files: $AccessoriesPath
+{
+   ConfigDotJsonPath="/var/lib/homebridge/"
+   ConfigDotJsonFilename="config.json"                                  # Change name to Debug
 
-   i=0 ; MAC_Count=0
+   # extract various details for Homebridge...
+   BridgeMAC=$(grep -n "username" /var/lib/homebridge/config.json | awk -F'"' '{print $4}')
+   JSONheader="$(head -9 /var/lib/homebridge/config.json)"              # Read header from existing config.json
+   JSONfooter="$(tail -9 /var/lib/homebridge/config.json)"              # Read header from existing config.json
 
-   printf "Removing existing accessories...\n"
-   find "$AccessoriesPath" -name * -type f -delete
+   # Remove existing config file...
+   rm -f $ConfigDotJsonPath$ConfigDotJsonFilename
 
-   printf "Removing existing device pairing...\n"
-   PersistPath=$PathToHAPNodeJS/persist/
-   find "$PersistPath" -name * -type f -delete
-   
-   printf "Creating Homekit accessories...\n\n"
+   #printf "Removing existing device pairing...\n"
+   #PersistPath=$PathToHAPNodeJS/persist/
+   #find "$PersistPath" -name * -type f -delete
+
+   printf "Creating %s\n" "$ConfigDotJsonPath$ConfigDotJsonFilename"
+   printf "==========|================|===========================|===================\n"
    printf "Accessory | Type           | Name                      | MAC address\n"
    printf "==========|================|===========================|===================\n"
    printf "  %-7s | %-14s | %-25s | %s\n" $MAC_Count "Bridge" "Node Bridge" "$BridgeMAC"
 
-# create an accessory file and customise the parameters for all defined alarm zones...   
-   maxval=${#zcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
+   # Use existing accessory data to create config.json file...
+   printf "%s\n" "$JSONheader"  >> $ConfigDotJsonPath$ConfigDotJsonFilename                 # Preserve existing header
+
+   # Create the 'Heat and water' accessory...
+   printf "        {\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"name\": \"Heating\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"turn_on\": \"echo \\\\\"Siri:iPhone:Heat mode:Heat and Water\\\\\" >> /var/www/data/input.txt\",\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"turn_off\": \"echo \\\\\"Siri:iPhone:Heat mode:Heat off\\\\\" >> /var/www/data/input.txt\",\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"check_status\": \"grep 'heat:mode:Heat and Water' /var/www/data/status.txt\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"poll_check\": \"2s\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"invert_status\": false,\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"accessory\": \"Command Accessory\"\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "        },\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+
+   # Create the 'Water' accessory...
+   printf "        {\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"name\": \"Water\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"turn_on\": \"echo \\\\\"Siri:iPhone:Heat mode:Water only\\\\\" >> /var/www/data/input.txt\",\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"turn_off\": \"echo \\\\\"Siri:iPhone:Heat mode:Heat off\\\\\" >> /var/www/data/input.txt\",\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"check_status\": \"grep 'heat:mode:Water only' /var/www/data/status.txt\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"poll_check\": \"2s\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"invert_status\": false,\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "            \"accessory\": \"Command Accessory\"\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+   printf "        },\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+
+   # Loop through all defined switches and create corresponding entries in the Homebridge config.json file...
+   maxval=${#rcon[@]} ; (( maxval-- )) ;                                                    # bump down because the array starts at 0
+   i=0 ; MAC_Count=0
    while [ $i -le "$maxval" ]; do
-      ZoneName="${zcon[$i+Name]}"
-      ZoneName="${ZoneName//[^[:ascii:]]/}"                                                 # stripping out any emojis
-      ZoneName="${ZoneName%"${ZoneName##*[![:space:]]}"}"                                   # strip any trailing spaces left by removing emojis
-      MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
-      FileName=$AccessoriesPath"${ZoneName}_accessory.ts"
-      printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Sensor" "${ZoneName}" "$MAC_address"
-      cp $PathToConfigFiles"/Generic_ContactSensor.ts" "${FileName}"
-      oldstring='Parm1'                                                                     # need to replace this string...
-      newstring=${ZoneName}                                                                 # ... with the zone name
-      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                     # do it.
-      oldstring='Parm2'                                                                     # need to replace this string...
-      newstring=${MAC_address}
-      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                     # do it.
-      
-      (( MAC_Count++ ))                                                                     # Bump the loop and MAC counters
-      i=$(( i + 9 )) 
+        AccType="${rcon[$i+rcon_HK_type]}"
+        AccName="${rcon[$i+rcon_name]}"
+        OnStr="echo \\\"HomeBridge:192.168.1.49:rcon swtch:"$((i / 8))":On\\\" >> /var/www/data/input.txt"
+        OffStr="echo \\\"HomeBridge:192.168.1.49:rcon swtch:"$((i / 8))":Off\\\" >> /var/www/data/input.txt"
+        StatusStr=$AccName".*On:O[nf]' /var/www/data/status.txt"
+
+        # Screen output...
+        printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "$AccType" "$AccName"
+
+        # File output...
+        printf "        {\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "            \"name\": \"%s\",\n" "$AccName" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "            \"turn_on\": \"%s\",\n" "$OnStr" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "            \"turn_off\": \"%s\",\n" "$OffStr" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "            \"check_status\": \"grep '%s\",\n" "$StatusStr" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "            \"poll_check\": \"2s\",\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "            \"invert_status\": false,\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "            \"accessory\": \"Command Accessory\"\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+        printf "        },\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
+
+        (( MAC_Count++ ))                                                                   # Bump the loop and MAC counters
+        i=$(( i + 8 ))
    done
-  
-# create an accessory file and customise the parameters for all defined power outlets...   
-   maxval=${#rcon[@]} ; (( maxval-- )) ; Count=0 ; i=0                                     # bump down because the array starts at zero
-   while [ $i -le "$maxval" ]; do
-#     printf "rcon:%s:%s:%s:%s:%s:%s:%s:%s\n" "${rcon[$i+rcon_header]}" "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_type]}" "${rcon[$i+rcon_address]}" \
-#              "${rcon[$i+rcon_channel]}" "${rcon[$i+rcon_status]}" "${rcon[$i+rcon_alrm_action]}" "${rcon[$i+rcon_HK_type]}"
-      AccName="${rcon[$i+rcon_name]}"
-      AccName="${AccName//[^[:ascii:]]/}"                                                  # stripping out any emojis
-      AccName="${AccName%"${AccName##*[![:space:]]}"}"                                     # strip any trailing spaces left by removing emojis
-      FileName=$AccessoriesPath"${AccName}_accessory.ts"
+   truncate -s-2 $ConfigDotJsonPath$ConfigDotJsonFilename                                   # Remove the final comma and CR
+   printf "\n%s\n" "$JSONfooter"  >> $ConfigDotJsonPath$ConfigDotJsonFilename               # Preserve existing footer
 
-      MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
-      case "${rcon[$i+rcon_HK_type]}" in                                                   # Create default accessory files...
-          "Light")
-             cp $PathToConfigFiles"/Generic_Light.ts" "$FileName";;
-          "Outlet")
-             cp $PathToConfigFiles"/Generic_Outlet.ts" "$FileName";;
-          "Fan")
-             cp $PathToConfigFiles"/Generic_Fan.ts" "$FileName";;
-      esac
-      if [ "${rcon[$i+rcon_HK_type]}" != "None" ]; then
-          printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "${rcon[$i+rcon_HK_type]}" "$AccName" "$MAC_address"
-          # if we have copied a file we need to customise it...
-          # Function strings to pass to alarm service
-          oldstring='Parm1'                                                                # need to replace this string...
-          newstring="${rcon[$i+rcon_name]}"                                                # ... with the accessory name
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm2'                                                                # need to replace this string...
-          newstring=${MAC_address}
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm3'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rcon swtch:'$Count':On\\n'                                # command to switch accessory on       
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm4'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rcon swtch:'$Count':Off\\n'                               # command to switch accessory off
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm5'                                                                # need to replace this string...
-          if [ "${rcon[$i+rcon_type]}" == "RF" ]; then
-              newstring=$(printf 'Handset %02d, Button %01d\n' "${rcon[i+rcon_address]}" \
-                "${rcon[$i+rcon_channel]}")                                                # RF configuration details
-          else
-              newstring=$(printf 'IP address 192.168.1.%02d\n' "${rcon[i+rcon_channel]}")  # Tasmota configuration details
-          fi
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-      fi
-      Count=$(( Count + 1 ))        
-      (( MAC_Count++ ))                                                                    # Bump the loop and MAC counters
-      i=$(( i + $rcon_count )) 
-   done
-
-# create an accessory file and customise the parameters for all defined radiator...   
-   maxval=${#rdtr[@]} ; (( maxval-- )) ; Count=0 ; i=0                                     # bump down because the array starts at zero
-   while [ $i -le "$maxval" ]; do
-#     printf "rdtr:%s:%s:%s:%s:%s:%s\n" "${rdtr[$i+rdtr_header]}" "${rdtr[$i+rdtr_name]}" "${rdtr[$i+rdtr_address]}" \
-#                "${rdtr[$i+rdtr_status]}" "${rdtr[$i+rdtr_hi]}" "${rdtr[$i+rdtr_lo]}"
-      FileName=$AccessoriesPath"${rdtr[$i+rdtr_name]}_radiator_accessory.ts"
-      cp $PathToConfigFiles"/Generic_Radiator.ts" "$FileName"
-      MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
-      if [ "${rdtr[$i+4]}" != "None" ]; then
-          printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Radiator" "${rdtr[$i+rdtr_name]}" "$MAC_address"
-          # if we have copied a file we need to customise it...
-          # Function strings to pass to alarm service
-          oldstring='Parm1'                                                                # need to replace this string...
-          newstring="${rdtr[$i+rdtr_name]}"                                                # ... with the accessory name
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm2'                                                                # need to replace this string...
-          newstring=${MAC_address}
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm3'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rdtr swtch:'$Count':On\\n'                                # command to switch accessory on       
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm4'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rdtr swtch:'$Count':Off\\n'                               # command to switch accessory off
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm5'                                                                # need to replace Max temp...
-          newstring="${rdtr[$i+rdtr_hi]}"                                                  # configuration details
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-          oldstring='Parm6'                                                                # need to replace Min temp...
-          newstring="${rdtr[$i+rdtr_lo]}"                                                  # configuration details
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-      fi
-      Count=$(( Count + 1 ))        
-      (( MAC_Count++ ))                                                                    # Bump the loop and MAC counters
-      i=$(( i + 6 )) 
-   done
-
-   # Add additional outlet for the Boiler...
-   MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
-   printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Heating" "Heat" "$MAC_address"
-   FileName=$AccessoriesPath"/Boiler_accessory.ts"
-   cp $PathToConfigFiles"/Generic_Heating.ts" $FileName
-   oldstring='Parm1'                                                                     # need to replace this string...
-   newstring="Boiler"                                                                    # ... with the zone name
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm2'                                                                     # need to replace this string...
-   newstring=${MAC_address}
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm3'                                                                     # need to replace this string...
-   newstring='Siri:iPhone:Heat mode:Heat and Water\\n'                                   # command to switch accessory on       
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm4'                                                                     # need to replace this string...
-   newstring='Siri:iPhone:Heat mode:Heat off\\n'                                         # command to switch accessory off
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm5'                                                                     # need to replace this string...
-   newstring='Handset 31, Button ??'
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm6'                                                                     # need to replace this string...
-   newstring='Heat and Water'
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-
-#   # Add additional outlet for the Water...
-   (( MAC_Count++ ))                                                                    # Bump the MAC counters
-   MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
-   printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Heating" "Water" "$MAC_address"
-   FileName=$AccessoriesPath"/Water_accessory.ts"
-   cp $PathToConfigFiles"/Generic_Heating.ts" $FileName
-   oldstring='Parm1'                                                                     # need to replace this string...
-   newstring="Water"                                                                     # ... with the zone name
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm2'                                                                     # need to replace this string...
-   newstring=${MAC_address}
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm3'                                                                     # need to replace this string...
-   newstring='Siri:iPhone:Heat mode:Water only\\n'                                       # command to switch accessory on       
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm4'                                                                     # need to replace this string...
-   newstring='Siri:iPhone:Heat mode:Heat off\\n'                                         # command to switch accessory off
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm5'                                                                     # need to replace this string...
-   newstring='Handset 31, Button ??'
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-   oldstring='Parm6'                                                                     # need to replace this string...
-   newstring='Water only'
-   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
-
-   cp $PathToConfigFiles"/types.ts" $AccessoriesPath"/types.ts"
    printf "==========|================|===========================|===================\n"
-
- # accessories have been created by root, so change owner to pi...
-   sudo chown -R pi $AccessoriesPath
-   sudo chgrp -R pi $AccessoriesPath
-
-   printf "\nExport complete\nRestarting HAP-NodeJS\n"
-   sudo killall node                                                                       # ensure we get a clean start...
-#  printf "(Last assigned acessory MAC address: "$MAC_address")\n"
-   sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
+   
+   hb-service restart                                                                       # Load new accessories
 }
 
 WriteUsers()
@@ -327,8 +214,8 @@ WriteUsers()
     i=0
     while [ $i -le "$maxval" ]; do
        printf "%s:%s:%s:%s\n" "${user[$i+$user_name]}" "${user[$i+user_pword]}" "${user[$i+user_email]}" "${user[$i+user_OTAC]}" >>/var/www/user.txt
-       i=$(( i + 4 )) 
-    done 
+       i=$(( i + 4 ))
+    done
     chgrp root /var/www/user.txt                                   # only visible to root
 }
 
@@ -347,13 +234,13 @@ CreateTaskList()
     i=0
     while [ $i -le "$maxval" ]; do
        cmnd+=("rcon swtch:$i")                                                # add the Remote Control channel name
-       (( i++ )) 
+       (( i++ ))
     done
     maxval=$(( ${#rdtr[@]} / 5 )) ; (( maxval-- ))                            # bump down because the array starts at zero
     i=0
     while [ $i -le "$maxval" ]; do
        cmnd+=("rdtr swtch:$i")                                                # add the radiator channel name
-       (( i++ )) 
+       (( i++ ))
     done
 #   declare -p cmnd                                                           # DIAGNOSTIC - dump result to console
 }
@@ -396,7 +283,7 @@ WriteCronJobs()
                     "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
                     "${cmnd[$DeviceNum]}" "${cron[$i+cron_status]}" >>/var/www/cron.txt
             fi
-        i=$(( i + 8 )) 
+        i=$(( i + 8 ))
     done
     crontab /var/www/cron.txt                                       # load the CRONTAB file
     rm /var/www/cron.txt                                            # tidy up
@@ -443,7 +330,7 @@ CheckIP()
 # This function is used to make sense of the reply when it arrives from the third party service.                                #
 #                                                                                                                               #
 #################################################################################################################################
-{ 
+{
     Responding_site=${PARAMS[1]}
     Current_routerIP=${PARAMS[3]}
     # First option - No Response Received...
@@ -486,13 +373,13 @@ InitPorts()
   pinctrl set 25 ip pn
 
   # Set outputs to inactive state...
-  pinctrl set 4 dl                       					   # LED Anode output   - inactive=low
-  pinctrl set 17 dl                      					   # LED Anode output   - inactive=low
-  pinctrl set 18 dl                      					   # LED Anode output   - inactive=low
-  pinctrl set 23 dl                      					   # LED Anode output   - inactive=low
-  pinctrl set 11 dl                      					   # Bell               - inactive=low
-  pinctrl set 8 dl                       					   # Strobe             - inactive=low
-  pinctrl set 7 dl                       					   # Sound bomb         - inactive=low
+  pinctrl set 4 dl                                             # LED Anode output   - inactive=low
+  pinctrl set 17 dl                                            # LED Anode output   - inactive=low
+  pinctrl set 18 dl                                            # LED Anode output   - inactive=low
+  pinctrl set 23 dl                                            # LED Anode output   - inactive=low
+  pinctrl set 11 dl                                            # Bell               - inactive=low
+  pinctrl set 8 dl                                             # Strobe             - inactive=low
+  pinctrl set 7 dl                                             # Sound bomb         - inactive=low
 
   # Load the I2C drivers...
   sudo modprobe i2c_bcm2708                                    # load drivers manually for this session
@@ -501,7 +388,7 @@ InitPorts()
   echo $tmp >> $LOGFILE                                        # log the event
   echo $tmp                                                    # tell the user
 
-  running_on_RasPi="true"                                      # flag to show we are on a pi with input ports 
+  running_on_RasPi="true"                                      # flag to show we are on a pi with input ports
                                                                # so alarm circuits should be scanned.
 }
 
@@ -519,7 +406,7 @@ eMail()
     maxval=${#user[@]} ; (( maxval-- )) ; i=0                                                 # bump down because the array starts at zero
     while [ $i -le "$maxval" ]; do
         circlist=${circlist}${user[$i+2]}","
-        i=$(( i + 4 )) 
+        i=$(( i + 4 ))
     done
     circlist=${circlist%?}                                                                    # remove the last character - its an extra ','
 
@@ -586,7 +473,7 @@ eMail()
         if [[ "$TriggeredZoneCount" -eq "0" ]] ; then
             TriggeredZoneString='No triggered zones      '
             emojiString="=F0=9F=91=8D"                                                      # thumbs up
-        else 
+        else
             TriggeredZoneString=$TriggeredZoneCount' triggered zone(s)      '
             emojiString="=F0=9F=86=98"                                                      # 'Save Our Stuff'
         fi
@@ -753,8 +640,8 @@ write_status_file()
       printf "zcon:%s:%s:%s:%s:%s:%s:%s:%s:%s\n" "${zcon[$i+$Type]}" "${zcon[$i+$Name]}" "${zcon[$i+$DayMode]}" \
                       "${zcon[$i+$NightMode]}" "${zcon[$i+$Chimes]}" "${zcon[$i+$Circuit]}" "${zcon[$i+$Triggered]}" \
                       "${zcon[$i+$PreviousValue]}" "${zcon[$i+$CurrentValue]}" >>/var/www/temp1.txt
-      i=$(( i + 9 )) 
-   done 
+      i=$(( i + 9 ))
+   done
 
    # Write the Radio Control configuration...
    maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                         # bump down because the array starts at zero
@@ -762,7 +649,7 @@ write_status_file()
       printf "rcon:%s:%s:%s:%s:%s:%s:%s:%s\n" "${rcon[$i+rcon_header]}" "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_type]}" "${rcon[$i+rcon_address]}" \
                                               "${rcon[$i+rcon_channel]}" "${rcon[$i+rcon_status]}" "${rcon[$i+rcon_alrm_action]}" \
                                               "${rcon[$i+rcon_HK_type]}" >>/var/www/temp1.txt
-      i=$(( i + $rcon_count )) 
+      i=$(( i + $rcon_count ))
    done
 
    # Write the radiator configuration...
@@ -770,7 +657,7 @@ write_status_file()
    while [ $i -le "$maxval" ]; do
       printf "rdtr:%s:%s:%s:%s:%s:%s\n" "${rdtr[$i+rdtr_headr]}" "${rdtr[$i+rdtr_name]}" "${rdtr[$i+rdtr_address]}" "${rdtr[$i+rdtr_status]}" \
                       "${rdtr[$i+rdtr_hi]}" "${rdtr[$i+rdtr_lo]}" >>/var/www/temp1.txt
-      i=$(( i + 6 )) 
+      i=$(( i + 6 ))
    done
 
    # Write the CRON jobs configuration...
@@ -779,16 +666,16 @@ write_status_file()
       printf "cron:%s:%s:%s:%s:%s:%s:%s:%s\n" "${cron[$i+cron_headr]}" "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" \
                                            "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
                                            "${cron[$i+cron_cmnd]}" "${cron[$i+cron_status]}" >>/var/www/temp1.txt
-      i=$(( i + 8 )) 
+      i=$(( i + 8 ))
    done
 
    # Write the User configuration...
-   maxval=${#user[@]} ; (( maxval-- )) ; i=4        # start at 4 because first 4 elements are the credentials for the 
+   maxval=${#user[@]} ; (( maxval-- )) ; i=4        # start at 4 because first 4 elements are the credentials for the
                                                     # alarm system email account
    while [ $i -le "$maxval" ]; do
       printf "user:%s:%s\n" "${user[$i]}" "${user[$i+2]}" >>/var/www/temp1.txt  # don't print the password or the OTAC
-      i=$(( i + 4 )) 
-   done 
+      i=$(( i + 4 ))
+   done
    mv /var/www/temp1.txt $1
 }
 
@@ -908,7 +795,7 @@ check_for_chime_condition()
       fi
     fi
 }
- 
+
 alarm_diag()
 #################################################################################################################################
 #                                                                                                                               #
@@ -924,7 +811,7 @@ alarm_diag()
       printf %s"-----|--------|--------------------|-----|-------|--------|---------|-------|---------|------|--------|------\n"
       maxval=${#zcon[@]}                                                                  # number of defined alarm zones
       (( maxval-- ))                                                                      # bump down because the array starts at zero
-      i=0                                                                                 # array index 
+      i=0                                                                                 # array index
       while [ $i -le "$maxval" ]; do                                                      # print all configured zones
           printf "%3s  | %6s | %18s | %3s | %5s | %6s | %7s | %5s | %7s | %4s | %6s | %s\n" $((i/9)) "${zcon[$i+$Type]}" "${zcon[$i+$Name]}" \
                            ${zcon[$i+$DayMode]} ${zcon[$i+$NightMode]} ${zcon[$i+$Chimes]} \
@@ -952,7 +839,7 @@ crontab_diag()
       printf %s"----|-------------------------------------|------|-------|---------|-------|---------|------------|-----\n"
       maxval=${#cron[@]}                                                                  # number of defined scheduled tasks
       (( maxval-- ))                                                                      # bump down because the array starts at zero
-      i=0                                                                                 # array index 
+      i=0                                                                                 # array index
       while [ $i -le "$maxval" ]; do                                                      # print all scheduled tasks
           printf "%-3s | %-35s |  %-3s |  %-4s |    %-4s |  %-4s |    %-4s | %-10s | %-3s \n" $((i/9)) "${cron[$i+cron_headr]}" "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" \
                                "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" "${cron[$i+cron_cmnd]}" "${cron[$i+cron_status]}"
@@ -978,12 +865,12 @@ rcon_diag()
 
       maxval=${#rcon[@]}                                                                  # number of defined Radio Control circuits
       (( maxval-- ))                                                                      # bump down because the array starts at zero
-      i=0                                                                                 # array index 
+      i=0                                                                                 # array index
       while [ $i -le "$maxval" ]; do                                                      # print all configured Radio Control circuits
           printf "%-6s|%-11s|%-16s| %-5s|    %-5s|    %-5s|  %-6s|  %-12s| %-8s|\n" "$i" "${rcon[$i+rcon_header]}" \
                  "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_type]}" "${rcon[$i+rcon_address]}" "${rcon[$i+rcon_channel]}" \
                  "${rcon[$i+rcon_status]}" "${rcon[$i+rcon_alrm_action]}" "${rcon[$i+rcon_HK_type]}"
-          i=$(( i + $rcon_count )) 
+          i=$(( i + $rcon_count ))
       done
       printf %s"------|-----------|----------------|------|---------|---------|--------|--------------|---------|\n"
       sleep 0.5s
@@ -1004,10 +891,10 @@ user_diag()
     printf %s"----|----------|--------------------------------------------------------------|------------------------|------------------------------------------\n"
       maxval=${#user[@]}                                                                  # number of defined user accounts
       (( maxval-- ))                                                                      # bump down because the array starts at zero
-      i=0                                                                                 # array index 
+      i=0                                                                                 # array index
       while [ $i -le "$maxval" ]; do                                                      # print all user data
           printf "%3s | %8s | %60s |%23s | %40s\n" $((i/4)) "${user[$i+user_name]}" "${user[$i+user_pword]}" "${user[$i+user_email]}" "${user[$i+user_OTAC]}"
-          i=$(( i + 4 )) 
+          i=$(( i + 4 ))
       done
     printf %s"----|----------|--------------------------------------------------------------|------------------------|------------------------------------------\n"
       sleep 0.5s
@@ -1028,11 +915,11 @@ radiator_diag()
     printf %s"----|--------------|--------------|---------|--------|----------|---------\n"
     maxval=${#rdtr[@]}                                                                  # number of defined Radiators
     (( maxval-- ))                                                                      # bump down because the array starts at zero
-    i=0                                                                                 # array index 
+    i=0                                                                                 # array index
     while [ $i -le "$maxval" ]; do                                                      # print all array data
         printf "%3s | %12s | %12s | %7s | %6s | %8s | %8s \n" $((i/6)) "${rdtr[$i+rdtr_hdr]}" "${rdtr[$i+rdtr_name]}" "${rdtr[$i+rdtr_address]}" \
                      "${rdtr[$i+rdtr_status]}" "${rdtr[$i+rdtr_hi]}" "${rdtr[$i+rdtr_lo]}"
-        i=$(( i + 6 )) 
+        i=$(( i + 6 ))
     done
     printf %s"----|--------------|--------------|---------|--------|----------|---------\n"
     sleep 0.5s
@@ -1110,7 +997,7 @@ elif [ -f /var/www/hols_default.txt ]; then                 # Failing that, do w
   title="System restart"                                    # Send email reporting the restart
   eMail "$title"
   else
-  load_status_file /var/www/factory.txt                     # No session data, or defaults available, so fail 
+  load_status_file /var/www/factory.txt                     # No session data, or defaults available, so fail
                                                             # back to factory defaults.
                                                             # Note: No valid email credentials, so can't send email
   tmp=${CURRTIME}",alarm,raspi,Settings: Loading factory defaults"
@@ -1140,13 +1027,13 @@ fi
 while :
 do
 CURRTIME=`date "+%H:%M:%S"`                                                # excel format
-#LOGFILE="/var/log/alarm"`date +%d-%m-%Y`".csv"              			   # name derived from date
+#LOGFILE="/var/log/alarm"`date +%d-%m-%Y`".csv"                            # name derived from date
      if [ -r /var/www/data/input.txt ];
         then
 # So there can be a whacky timing issue here. If Homekit has Scenes configured, its possible we will get 10 or 20 commands
 # arriving simultaneously. So we need to ensure the service doesn't read and lock the input file until Homekit has
 # finished writing all the commands. Pausing for a tenth of a second seems to work ok, but give it 2 tenths for luck...
-           sleep 0.2s 
+           sleep 0.2s
            while read info
              do
 #              echo $info                                                  # Diagnostic
@@ -1179,13 +1066,13 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    echo $tmp;;                                             # tell the user
                  "HomeBridge")
                  # handles all the HomeBridge options
-                   if [ "${PARAMS[3]}" == "Export" ]; then 
+                   if [ "${PARAMS[3]}" == "Export" ]; then
                       tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge export"
                       echo $tmp >> $LOGFILE                                   # log the event
-                      echo $tmp                                               # tell the user                  
+                      echo $tmp                                               # tell the user
                       Homebridge_Export
                    fi
-                   if [ "${PARAMS[3]}" == "Restart" ]; then 
+                   if [ "${PARAMS[3]}" == "Restart" ]; then
                       tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge restart"
                       echo $tmp >> $LOGFILE                                   # log the event
                       echo $tmp                                               # tell the user
@@ -1223,9 +1110,9 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    rm -f /var/www/data/status.txt                           # normally done by the web page, but this time
                                                                             # has to be done through BASH
                    alarm="Timed out !"
-				   pinctrl set 11 dl                      					# Bell               - inactive=low
-				   pinctrl set 8 dl                       					# Strobe             - inactive=low
-				   pinctrl set 7 dl                       					# Sound bomb         - inactive=low
+                   pinctrl set 11 dl                                        # Bell               - inactive=low
+                   pinctrl set 8 dl                                         # Strobe             - inactive=low
+                   pinctrl set 7 dl                                         # Sound bomb         - inactive=low
 
                    check_for_alarm_condition                                # tamper zones can still cause a re-trigger
                    title="Alarm system: TIMEOUT"
@@ -1339,15 +1226,15 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    if [ -n "$(pgrep alarm_active.sh)" ]; then              # is the alarm sounding ? ...
                      pkill -P $(pgrep alarm_active.sh)                     # ... kill it - and kill any pending timeout task and any sleep sub processes
                    fi
-				   pinctrl set 11 dl                      				   # Bell               - inactive=low
-				   pinctrl set 8 dl                       				   # Strobe             - inactive=low
-				   pinctrl set 7 dl                       				   # Sound bomb         - inactive=low
+                   pinctrl set 11 dl                                       # Bell               - inactive=low
+                   pinctrl set 8 dl                                        # Strobe             - inactive=low
+                   pinctrl set 7 dl                                        # Sound bomb         - inactive=low
 
                    mode="Standby"
                    alarm="Set"                                             # clear any alarm condition
                    maxval=${#zcon[@]}                                      # number of defined alarm zones
                    (( maxval-- ))                                          # bump down because the array starts at zero
-                   i=0                                                     # array index 
+                   i=0                                                     # array index
                    while [ $i -le "$maxval" ]; do
                       zcon[$i+Triggered]="false"                           # clear any triggered zones
                       zcon[$i+PreviousValue]="false"                       # reset zone states
@@ -1363,10 +1250,10 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    echo $tmp                                                    # tell the user
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only run if we are on a pi. This prevents non pi platforms from flooding the console with errors.
-					  pinctrl set 11 dh                                         # Set bell port active
+                      pinctrl set 11 dh                                         # Set bell port active
                       # set up background task to cancel the test in 4 seconds
                       ( sleep 4
-					    pinctrl set 11 dl                                       # Set bell port inactive
+                        pinctrl set 11 dl                                       # Set bell port inactive
                         break )&
                    fi;;
                  "test strobe")
@@ -1375,10 +1262,10 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    echo $tmp                                                    # tell the user
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only run if we are on a pi. This prevents non pi platforms from flooding the console with errors.
-					  pinctrl set 8 dh                                          # Set strobe port active
+                      pinctrl set 8 dh                                          # Set strobe port active
                       # set up background task to cancel the test in 5 secs
                       ( sleep 5
-					    pinctrl set 8 dl                                          # Set strobe port inactive
+                        pinctrl set 8 dl                                          # Set strobe port inactive
                         break )&
                    fi;;
                  "test sounder")
@@ -1387,9 +1274,9 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    echo $tmp                                                    # tell the user
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only run if we are on a pi. This prevents non pi platforms from flooding the console with errors.
-					  pinctrl set 7 dh                                          # Sound Bomb active
+                      pinctrl set 7 dh                                          # Sound Bomb active
                       ( sleep 1s
-					    pinctrl set 7 dl                                        # Sound Bomb inactive
+                        pinctrl set 7 dl                                        # Sound Bomb inactive
                         break )&
                    fi;;
 
@@ -1432,7 +1319,7 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                            else
                                # RasPi model 2 and 3 uses i2C bus 1...
                                printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*$rcon_count+rcon_address]} ${rcon[${PARAMS[3]}*$rcon_count+rcon_channel]}
-                           fi 
+                           fi
                         fi
                         if [ ${running_on_RasPi} == "true" ]; then
                            # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
@@ -1479,12 +1366,12 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    # This means if the zone has entered a triggered state, the web page will be updated accordingly.
 
                    zcon[${PARAMS[3]}*9+$PreviousValue]=${zcon[${PARAMS[3]}*9+$CurrentValue]}     # record previous state
-				   pinctrl set ${anode[${zcon[$i+5]}-1]} dh                                      # activate the anode
-			       zcon[${PARAMS[3]}*9+$CurrentValue]=$(pinctrl lev ${cathode[${zcon[$i+5]}-1]}) # read and record the value on the input
-			       pinctrl set ${anode[${zcon[$i+5]}-1]} dl                                      # deactivate the anode
-				   
+                   pinctrl set ${anode[${zcon[$i+5]}-1]} dh                                      # activate the anode
+                   zcon[${PARAMS[3]}*9+$CurrentValue]=$(pinctrl lev ${cathode[${zcon[$i+5]}-1]}) # read and record the value on the input
+                   pinctrl set ${anode[${zcon[$i+5]}-1]} dl                                      # deactivate the anode
+
                    check_for_alarm_condition                                                     # check if new status triggers any zones
-                   ;;                                   
+                   ;;
                  "zcon del")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
                    echo $tmp >> $LOGFILE                                   # log the event
@@ -1561,7 +1448,7 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                    echo $tmp                                               # tell the user
                    rdtr=("${rdtr[@]:0:$((${PARAMS[3]}*6))}" "${rdtr[@]:$(($((${PARAMS[3]}*6)) + 6))}")
                    ;;
-                       
+
 #################################################################################################################################
 #
 # Handle commands passed from the Schedule web page.
@@ -1618,12 +1505,12 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
 
            maxval=${#zcon[@]}                                                    # number of defined alarm zones
            (( maxval-- ))                                                        # bump down because the array starts at zero
-           i=0                                                                   # array index 
+           i=0                                                                   # array index
            while [ $i -le "$maxval" ]; do
                zcon[$i+$PreviousValue]=${zcon[$i+$CurrentValue]}                 # record previous state
-			   pinctrl set ${anode[${zcon[$i+5]}-1]} dh                          # activate the anode
-			   zcon[$i+$CurrentValue]=$(pinctrl lev ${cathode[${zcon[$i+5]}-1]})
-			   pinctrl set ${anode[${zcon[$i+5]}-1]} dl                          # deactivate the anode
+               pinctrl set ${anode[${zcon[$i+5]}-1]} dh                          # activate the anode
+               zcon[$i+$CurrentValue]=$(pinctrl lev ${cathode[${zcon[$i+5]}-1]})
+               pinctrl set ${anode[${zcon[$i+5]}-1]} dl                          # deactivate the anode
                if [[ "${zcon[$i+$PreviousValue]}" -ne "${zcon[$i+$CurrentValue]}" ]]; then
                   if [[ ${zcon[$i+$CurrentValue]} = "0" ]]; then
                      changed=${zcon[$i+$Name]}" open"
@@ -1632,7 +1519,7 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
                   fi
                fi
                i=$(( i + 9 ))
-           done 
+           done
 
            if [ -n "$changed" ]; then                              # if we have a value for changed, then a circuit has changed
                                                                    # since the last scan and we need to dig deeper...
@@ -1645,7 +1532,7 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
            fi
       fi
 
-# The following 4 lines can be used to invoke the diagnostic routines. These show the contents of the data arrays in real time on the 
+# The following 4 lines can be used to invoke the diagnostic routines. These show the contents of the data arrays in real time on the
 # system console. Only one diagnostic should be run at a time. Do not leave any of the diagnostics running on a live device, as they
 # slow down the operation of the code.
 
