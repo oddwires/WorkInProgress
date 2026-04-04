@@ -121,6 +121,7 @@ Homebridge_Export()
 #################################################################################################################################
 {
    ConfigDotJsonPath="/var/lib/homebridge/"
+   PersistPath="/var/lib/homebridge/persist/"
    ConfigDotJsonFilename="config.json"                                  # Change name to Debug
 
    # extract various details for Homebridge...
@@ -130,21 +131,22 @@ Homebridge_Export()
 
    # Remove existing config file...
    rm -f $ConfigDotJsonPath$ConfigDotJsonFilename
-
-   #printf "Removing existing device pairing...\n"
-   #PersistPath=$PathToHAPNodeJS/persist/
-   #find "$PersistPath" -name * -type f -delete
+   printf "Removing existing device pairing...\n"
+   find "$PersistPath" -name * -type f -delete
 
    printf "Creating %s\n" "$ConfigDotJsonPath$ConfigDotJsonFilename"
    printf "==========|================|===========================|===================\n"
    printf "Accessory | Type           | Name                      | MAC address\n"
    printf "==========|================|===========================|===================\n"
-   printf "  %-7s | %-14s | %-25s | %s\n" $MAC_Count "Bridge" "Node Bridge" "$BridgeMAC"
+   printf "  %-7s | %-14s | %-25s | %s\n" "-" "Bridge" "Node Bridge" "$BridgeMAC"
 
    # Use existing accessory data to create config.json file...
    printf "%s\n" "$JSONheader"  >> $ConfigDotJsonPath$ConfigDotJsonFilename                 # Preserve existing header
 
    # Create the 'Heat and water' accessory...
+   # Screen output...
+   printf "  %-7s | %-14s | %-25s | %s\n" "-" "Heater" "Switch"
+   # config.json output...
    printf "        {\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
    printf "            \"name\": \"Heating\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
    printf "            \"turn_on\": \"echo \\\\\"Siri:iPhone:Heat mode:Heat and Water\\\\\" >> /var/www/data/input.txt\",\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
@@ -156,6 +158,9 @@ Homebridge_Export()
    printf "        },\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
 
    # Create the 'Water' accessory...
+   # Screen output...
+   printf "  %-7s | %-14s | %-25s | %s\n" "-" "Water" "Switch"
+   # config.json output...
    printf "        {\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
    printf "            \"name\": \"Water\",\n"  >> $ConfigDotJsonPath$ConfigDotJsonFilename
    printf "            \"turn_on\": \"echo \\\\\"Siri:iPhone:Heat mode:Water only\\\\\" >> /var/www/data/input.txt\",\n" >> $ConfigDotJsonPath$ConfigDotJsonFilename
@@ -195,10 +200,12 @@ Homebridge_Export()
    done
    truncate -s-2 $ConfigDotJsonPath$ConfigDotJsonFilename                                   # Remove the final comma and CR
    printf "\n%s\n" "$JSONfooter"  >> $ConfigDotJsonPath$ConfigDotJsonFilename               # Preserve existing footer
-
+   
+   # Screen output...
    printf "==========|================|===========================|===================\n"
    
    hb-service restart                                                                       # Load new accessories
+   printf "Homebridge ready.\n"
 }
 
 WriteUsers()
