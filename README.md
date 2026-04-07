@@ -11,4 +11,4 @@ Key differences...
 
 1) Based on [Homebridge Raspberry Pi Image](https://homebridge.io/raspberry-pi-image) (Debian Trixie)
 2) Moved all log file into /var/log/ and updated Samba data share to point to it.
-3) It's starting tolook like it just ain't going to work on a Raspberry Pi 2 model B any more.
+3) It's starting to look like it just ain't going to work on a Raspberry Pi 2 model B any more.
