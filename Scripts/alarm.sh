@@ -968,6 +968,9 @@ case "${tmp}" in
     "a02082" | "a22082" | "a32082" | "a52082" | "a22083")
         hardware='Raspberry Pi model 3B'
         InitPorts;;                                         # we are on a PI so initialise the ports
+     "a020d3" | "a020d4" )
+        hardware='Raspberry Pi model 3B+'
+        InitPorts;;                                         # we are on a PI so initialise the ports
 esac
 tmp=${CURRTIME}",alarm,raspi,GPIO ports initialised for "${hardware}
 
