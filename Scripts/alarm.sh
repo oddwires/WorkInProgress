@@ -179,7 +179,7 @@ Homebridge_Export()
         AccName="${rcon[$i+rcon_name]}"
         OnStr="echo \\\"HomeBridge:192.168.1.49:rcon swtch:"$((i / 8))":On\\\" >> /var/www/data/input.txt"
         OffStr="echo \\\"HomeBridge:192.168.1.49:rcon swtch:"$((i / 8))":Off\\\" >> /var/www/data/input.txt"
-        StatusStr=$AccName".*On:O[nf]' /var/www/data/status.txt"
+        StatusStr=$AccName".*On:On\\|"$AccName".*Of\\|"$AccName".*On:No' /var/www/data/status.txt"
 
         # Screen output...
         printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "$AccType" "$AccName"
