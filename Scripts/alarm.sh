@@ -31,7 +31,7 @@
 # Use set -x to enable debugging
 # Use set +x to disable debugging
 
-set -f                                                         # Globbing off - we need to handle * and over characters
+set -f                                                         # Globbing off - we need to handle * and other characters
 
 # Default password is a BlowFish hash. The actual password is qwerty
 DefaultPassword='$2y$07$2c0bfALZ4WxenSybt2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G'
@@ -119,8 +119,7 @@ Homebridge_Export()
 # Function to export all currently configured devices to Homebridge                                                             #
 #                                                                                                                               #
 #################################################################################################################################
-{
-   ConfigDotJsonPath="/var/lib/homebridge/"
+{  ConfigDotJsonPath="/var/lib/homebridge/"
    PersistPath="/var/lib/homebridge/persist/"
    ConfigDotJsonFilename="config.json"                                  # Change name to Debug
 
@@ -214,7 +213,8 @@ WriteUsers()
 # Function to dump user credentials from memory to file.                                                                        #
 #                                                                                                                               #
 #################################################################################################################################
-{ if [ -f /var/www/user.txt ]; then                                # clear out previous results
+{
+  if [ -f /var/www/user.txt ]; then                                # clear out previous results
     rm /var/www/user.txt; fi
 #   printf "email:%s:%s:-\n" "${EMAIL_password}" "${EMAIL_sender}"  >>/var/www/user.txt
     maxval=${#user[@]} ; (( maxval-- ))                            # bump down because the array starts at zero
@@ -1037,7 +1037,7 @@ fi
 while :
 do
 CURRTIME=`date "+%H:%M:%S"`                                                # excel format
-#LOGFILE="/var/log/alarm"`date +%d-%m-%Y`".csv"                            # name derived from date
+LOGFILE="/var/log/alarm_"`date +%d-%m-%Y`".csv"                            # name derived from date
      if [ -r /var/www/data/input.txt ];
         then
 # So there can be a whacky timing issue here. If Homekit has Scenes configured, its possible we will get 10 or 20 commands
