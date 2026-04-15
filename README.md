@@ -110,8 +110,8 @@ Logon using the local user account.<br>
 
 ## Useful file locations:-
 
-https:\/\/\<IP Address>/login          Alarm System console   
-http:\/\/\<IPAddress>:8582/login        Homebridge console   
+https:\/\/\<ip address>/            Alarm System console   
+http:\/\/\<ip address>:8581/          Homebridge console   
 
   apache2                /var/log/apache2/access.log   
                         /var/log/apache2/error.log   
