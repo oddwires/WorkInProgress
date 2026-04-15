@@ -109,7 +109,11 @@ Logon using the local user account.<br>
 2) NPM install won't run as default user.
 
 ## File locations:-
-  apache2                /var/log/apache2/access.log
-                        /var/log/apache2/error.log
+  apache2                /var/log/apache2/access.log   
+                        /var/log/apache2/error.log   
+                        /etc/apache2/sites-available/000-default.conf   
+
+sudo netstat -plnt
+                        
                                   
 
