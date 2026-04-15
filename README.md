@@ -117,7 +117,9 @@ http:\/\/\<ip address>:8581/          Homebridge console
                         /var/log/apache2/error.log   
                         /etc/apache2/sites-available/000-default.conf   
   NGINX                 /var/log/nginx/error.log   
-                                /etc/nginx/nginx.conf
+                                /etc/nginx/nginx.conf   
+  postfix                 /var/log/postfix.log   
+                                /etc/postfix/main.cf
 
 sudo netstat -plnt   
 sudo hb-config   
