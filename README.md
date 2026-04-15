@@ -106,4 +106,10 @@ Logon using the local user account.<br>
   sudo service apache2 restart               # Apache2 grabs port 80   
   nginx -s reload                     # Restart NGINX - an error is logged about port 80, but it continues to run
 
-2) NPM install won't run as default user. 
+2) NPM install won't run as default user.
+
+## File locations:-
+  apache2                /var/log/apache2/access.log
+                        /var/log/apache2/error.log
+                                  
+
