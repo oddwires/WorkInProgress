@@ -112,6 +112,8 @@ Logon using the local user account.<br>
   apache2                /var/log/apache2/access.log   
                         /var/log/apache2/error.log   
                         /etc/apache2/sites-available/000-default.conf   
+  NGINX                 /var/log/nginx/error.log   
+                                /etc/nginx/nginx.conf
 
 sudo netstat -plnt
                         
