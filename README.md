@@ -108,7 +108,11 @@ Logon using the local user account.<br>
 
 2) NPM install won't run as default user.
 
-## File locations:-
+## Useful file locations:-
+
+https:\/\/\<IP Address>/login          Alarm System console   
+http:\/\/\<IPAddress>:8582/login        Homebridge console   
+
   apache2                /var/log/apache2/access.log   
                         /var/log/apache2/error.log   
                         /etc/apache2/sites-available/000-default.conf   
