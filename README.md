@@ -115,7 +115,9 @@ Logon using the local user account.<br>
   NGINX                 /var/log/nginx/error.log   
                                 /etc/nginx/nginx.conf
 
-sudo netstat -plnt
+sudo netstat -plnt   
+sudo hb-config   
+
                         
                                   
 
