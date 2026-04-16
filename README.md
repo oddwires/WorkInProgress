@@ -9,7 +9,7 @@ This repo is about getting the build working again.
 
 ## Install on a Raspberry Pi
 
-The alarm system is intended for use on a <a href="https://www.raspberrypi.org/products/raspberry-pi-3-model-b/" target="_blank">Raspberry Pi 3 model B</a> running [Homebridge Raspberry Pi Image](https://homebridge.io/raspberry-pi-image) (Debian Trixie)
+The alarm system is intended for use on a <a href="https://www.raspberrypi.org/products/raspberry-pi-3-model-b/" target="_blank">Raspberry Pi 3 model B</a> running [Homebridge Raspberry Pi Image](https://github.com/homebridge/homebridge-raspbian-image/wiki/Getting-Started) (Debian Trixie)
 
 At first boot, the Homebridge image will prompt to create a local user account, so you will need to attach a keyboard and monitor for this stage. After that, you can continue the install either through the console, or through an SSH (terminal) session.<br>
 
@@ -17,7 +17,7 @@ Logon using the local user account.<br>
  
 <table style="width: 100%;" border="2">
 <tbody>
-<tr>
+<tr>https://github.com/homebridge/homebridge-raspbian-image/wiki/Getting-Started
 <th style="width: 3%;">Stage</th>
 <th style="width: 15%;">Linux command</th>
 <th>Notes</th>
