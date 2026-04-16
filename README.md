@@ -105,8 +105,8 @@ Logon using the local user account.<br>
   nginx -s stop                      # Stop NGINX - This releases port 80   
   sudo service apache2 restart               # Apache2 grabs port 80   
   nginx -s reload                     # Restart NGINX - an error is logged about port 80, but it continues to run
-
-2) NPM install won't run as default user.
+2) NPM install won't run as default user.   
+3) Install script crashes when installing self signed certificate.   
 
 ## Useful file locations:-
 
