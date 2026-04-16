@@ -18,7 +18,7 @@ Logon using the local user account.<br>
  
 <table style="width: 100%;" border="2">
 <tbody>
-<tr>https://github.com/homebridge/homebridge-raspbian-image/wiki/Getting-Started
+<tr>
 <th style="width: 3%;">Stage</th>
 <th style="width: 15%;">Linux command</th>
 <th>Notes</th>
