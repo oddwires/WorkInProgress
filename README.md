@@ -105,5 +105,25 @@ Logon using the local user account.<br>
   nginx -s stop                      # Stop NGINX - This releases port 80   
   sudo service apache2 restart               # Apache2 grabs port 80   
   nginx -s reload                     # Restart NGINX - an error is logged about port 80, but it continues to run
+2) NPM install won't run as default user.   
+3) Install script crashes when installing self signed certificate.   
 
-2) NPM install won't run as default user. 
+## Useful file locations:-
+
+https:\/\/\<ip address>/            Alarm System console   
+http:\/\/\<ip address>:8581/          Homebridge console   
+
+  apache2                /var/log/apache2/access.log   
+                        /var/log/apache2/error.log   
+                        /etc/apache2/sites-available/000-default.conf   
+  NGINX                 /var/log/nginx/error.log   
+                                /etc/nginx/nginx.conf   
+  postfix                 /var/log/postfix.log   
+                                /etc/postfix/main.cf
+
+sudo netstat -plnt   
+sudo hb-config   
+
+                        
+                                  
+
