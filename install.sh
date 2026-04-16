@@ -118,15 +118,21 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    tput setaf 9                                               # Reset to default text colour
+   sudo nginx -s stop                                         # Stop NGINX while we insatll Apache2
    # Apache install...
    sudo apt-get install -y apache2 php
 
    # edit the Apache2 default http web page...
-   filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
-   oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
-   newstring='DocumentRoot /var/www'                                          # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
-   sudo service apache2 restart
+   # filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
+   # oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
+   # newstring='DocumentRoot /var/www'                                          # ... with this one
+   # sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+
+   sudo cp -v ./ConfigFiles/000-default.conf /etc/apache2/                      # Prevent Apache2 from using port 80
+   sudo cp ./ConfigFiles/nginx.conf /etc/nginx/                                 # Prevent NGINX from using port 80
+
+   sudo service apache2 restart                                                 # Restart Apache2
+   sudo nginx -s reload                                                         # Restart NGINX
 fi
 #read -n1 -r -p "Press any key to continue..." key
 
@@ -406,7 +412,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # Samba common binaries...
   sudo apt-get -y install samba-common-bin
 
-  # Configure Samaba for Windows 7 clients...
+  # Configure Samaba for Windows clients...
   filename='/etc/samba/smb.conf'
   sudo cp ./ConfigFiles/smb.conf $filename
 
@@ -523,13 +529,15 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 9                              *"
 echo "*                                                                              *"
-echo "*  Install and configure HomeKit Bridge                                        *"
+echo "*  Configure Homebridge connector                                              *"
 echo "*                                                                              *"
-echo "* This uses HAP-NodeJS, a Node.JS implementation of Apples HomeKit Accessory   *"
-echo "* Server. This allows control of the power switches and radiators              *"
-echo "* using either the iPhone Home app, or Siri (voice control).                   *"
+echo "*  Homebridge is a lightweight Node.js server you can run on your home         *"
+echo "*  network that emulates the iOS HomeKit API. It supports Plugins, which       *"
+echo "*  are community-contributed modules that provide a basic bridge from          *"
+echo "*  HomeKit to various 3rd-party APIs provided by manufacturers of              *"
+echo "*  "smart home" devices.                                                       *"
 echo "*                                                                              *"
-echo "* Full project details on the GitHub https://github.com/KhaosT/HAP-NodeJS      *"
+echo "* Full project details on GitHub https://github.com/homebridge/homebridge      *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -540,45 +548,9 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   tput setaf 9                                               # Reset to default text colour
-  # install various pre requisites...
-  cd ..                                         # install into the Downloads directory
-  sudo apt-get install libavahi-compat-libdnssd-dev -y
-  sudo apt-get install -y npm
   
-  # Ideally these should be installed locally. But this causes issues with the ts-node executable
-  # not being found. Its probably just a path issue, but I installed Globally as a workaround.
-  sudo npm install -g ts-node
-  sudo npm install -g typescript
-
-  # install the HAP-NodeJS server...
-  git clone https://github.com/KhaosT/HAP-NodeJS.git
-  
-  # because we've sudo'd the git clone, the directory structure will belong to root. This causes issues.
-  # the first time the service runs, it creates a 'persists' folder, but assigns the wrong permissions.
-  # the following 5 lines return the sudo cloned repo to a usable state...
-  mkdir HAP-NodeJS/persist          # Create the folder now rather than letting the service
-                                    # do it at first run.
-  sudo chown -R pi ./HAP-NodeJS     # Belt and braces solution - force permissions from root to pi
-  sudo chgrp -R pi ./HAP-NodeJS
-  sudo chmod g+s ./HAP-NodeJS       # new folders + files will inherit directory group details
-  sudo chmod u+s ./HAP-NodeJS       # new folders + files will inherit directory user details
-
-  cd HAP-NodeJS/
-  npm install
-  npm install --only=dev
-  
-  # remove faulty demo accessory that prevents the service from starting...
-  sudo rm ../HAP-NodeJS/src/accessories/TV_accessory.ts
-   
-  cd $CurrentDir                                                     # back to where we started
-  # create the new daemon, and make it auto-start...
-  sudo cp ./Scripts/homebridge /etc/init.d/
-  sudo chgrp root /etc/init.d/homebridge
-  sudo chown root /etc/init.d/homebridge
-  sudo chmod +x /etc/init.d/homebridge
-  sudo update-rc.d homebridge defaults
-
-  cd ..                             # back to Downloads directory
+  sudo usermod -a -G www-data homebridge                     # Give Homebridge service 
+                                                             #  read/write access to alarm system data
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
