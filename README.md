@@ -12,7 +12,7 @@ This repo is about getting the build working again.
 The alarm system is intended for use on a <a href="https://www.raspberrypi.org/products/raspberry-pi-3-model-b/" target="_blank">Raspberry Pi 3 model B</a> running the
 <a href="https://github.com/homebridge/homebridge-raspbian-image/wiki/Getting-Started/" target="_blank">Homebridge Raspberry Pi image</a> (Debian Trixie)
 
-At first boot, the Homebridge image will prompt to create a local user account, so you will need to attach a keyboard and monitor for this stage. After that, you can continue the install either through the console, or through an SSH (terminal) session.<br>
+At first boot, the Homebridge image will prompt to select the keyboard layout, and then to create a local user account. You will need to attach a keyboard and monitor for these steps. After that, you can continue the install either through the console, or through an SSH (terminal) session.<br>
 
 Logon using the local user account.<br>
  
@@ -113,7 +113,9 @@ http:\/\/\<ip address>:8581/          Homebridge console
   NGINX                 /var/log/nginx/error.log   
                                 /etc/nginx/nginx.conf   
   postfix                 /var/log/postfix.log   
-                                /etc/postfix/main.cf
+                                /etc/postfix/main.cf   
+  SAMBA                 /var/log/samba/log.smbd  
+                             /etc/samba/smb.conf   
 
 sudo netstat -plnt   
 sudo hb-config   
