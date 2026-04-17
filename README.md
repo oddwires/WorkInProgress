@@ -42,21 +42,21 @@ Logon using the local user account.<br>
 <td>Download package lists for software repositories and update them with the newest versions of packages and dependencies.</td>
 </tr>
 <tr>
-<td>4</td>
+<td>3</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">mkdir Downloads</blockquote>
 </td>
 <td>Downloads from the GitHub will be stored in this directory.</td>
 </tr>
 <tr>
-<td>5</td>
+<td>4</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">cd Downloads</blockquote>
 </td>
 <td>Change into the Downloads directory.</td>
 </tr>
 <tr>
-<td>6</td>
+<td>5</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">git clone https://github.com/oddwires/WorkInProgress.git</blockquote>
 </td>
@@ -64,28 +64,28 @@ Logon using the local user account.<br>
 (copies all files from the Git Hub to the Download directory).</td>
 </tr>
 <tr>
-<td>7</td>
+<td>6</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">sudo mv WorkInProgress alarm-system</blockquote>
 </td>
 <td>Rename the install directory.</td>
 </tr>
 <tr>
-<td>8</td>
+<td>7</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">cd alarm-system</blockquote>
 </td>
 <td>Move into the install directory.</td>
 </tr>
 <tr>
-<td>9</td>
+<td>8</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">chmod +x install.sh</blockquote>
 </td>
 <td>Make install script executable.</td>
 </tr>
 <tr>
-<td>10</td>
+<td>9</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">sudo ./install.sh</blockquote>
 </td>
