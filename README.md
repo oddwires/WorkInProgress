@@ -1,21 +1,22 @@
 # WorkInProgress
 So my alarm system has been running reliably for over 6 years. Looking after my house when I'm out, and waking me up in the mornings with a cup of tea.  
+
 Then out of nowhere, the SD card fails :(  
-  
+
 No problem - I'll just create a new SD card from my Github repo.  
 However all the dependancies have changed, and its just not that easy.
 
-This repo is about getting the build working again.
+This repo is about getting the build working again, and transitioning it to the Raspberry Pi Homebridge image.
 
 ## Install on a Raspberry Pi
 
 The alarm system is intended for use on a <a href="https://www.raspberrypi.org/products/raspberry-pi-3-model-b/" target="_blank">Raspberry Pi 3 model B</a> running the
 <a href="https://github.com/homebridge/homebridge-raspbian-image/wiki/Getting-Started/" target="_blank">Homebridge Raspberry Pi image</a> (Debian Trixie)
 
-At first boot, the Homebridge image will prompt to select the keyboard layout, and then to create a local user account. You will need to attach a keyboard and monitor for these steps. After that, you can continue the install either through the keyboard and monitor, or through an SSH (terminal) session.<br>
+At first boot, the Homebridge image will prompt to select the keyboard layout, and then to create a local user account. You will need to attach a keyboard and monitor for these steps. After that, you can continue the install either through the keyboard and monitor, or through an SSH (terminal) session.   
 
-Logon using the local user account.<br>
- 
+Logon using the local user account.   
+
 <table style="width: 100%;" border="2">
 <tbody>
 <tr>
