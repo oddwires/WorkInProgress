@@ -432,10 +432,9 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   newstring="$CurrentDir"                                            # path to install directory
   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"             # do it.
 
-  # NODEjs directory...
+  # Homebridge directory...
   oldstring='parm4'                                                  # need to replace this string...
-  parent=$(dirname $PWD)                                             # directory name up one level
-  newstring="$parent"/HAP-NodeJS                                     # path to NODEjs repository
+  newstring="/var/lib/homebridge"                                    # ... with this one
   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"             # do it.
 
   clear
