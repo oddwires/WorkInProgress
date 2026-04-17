@@ -452,18 +452,6 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo smbpasswd -e $CurrentUsr
   clear
 
-  # add password for root...
-  tput setaf 2                                               # Green text
-  echo " "
-  echo "SAMBA needs to set a password for the root user."
-  echo "This will enable access to the network shares from a Windows network."
-  echo "Note: the file permissions will permit FULL ACCESS."
-  echo "(tip - use the same password as the root user ID)"
-  echo ""
-  tput setaf 9                                               # Reset to default text colour
-  sudo smbpasswd -a root
-  # enable the password for the root user...
-  sudo smbpasswd -e root
   # restart the service...
   sudo service smbd restart
 fi
