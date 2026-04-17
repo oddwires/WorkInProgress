@@ -42,13 +42,6 @@ Logon using the local user account.<br>
 <td>Download package lists for software repositories and update them with the newest versions of packages and dependencies.</td>
 </tr>
 <tr>
-<td>3</td>
-<td>
-<blockquote style="font-weight: normal; background: #c0c0c0;">sudo apt-get -y install git</blockquote>
-</td>
-<td>Install the Git agent to allow downloads from the Git Hub.</td>
-</tr>
-<tr>
 <td>4</td>
 <td>
 <blockquote style="font-weight: normal; background: #c0c0c0;">mkdir Downloads</blockquote>
