@@ -24,7 +24,8 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   tput setaf 9                                               # Reset to default text colour
   # Upgrades...
   # sudo apt-get -y upgrade
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade     # mute the install dialogue
+  # sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade     # mute the install dialogue
+  sudo DEBIAN_FRONTEND='noninteractive' apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' upgrade
   sudo apt-get install build-essential
 fi
 #read -n1 -r -p "Press any key to continue..." key
