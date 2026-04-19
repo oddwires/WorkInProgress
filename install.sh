@@ -127,7 +127,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    # Apache2 needs to connect to port 443 ONLY. This provides the alarm-system web interface.
    # Edit the Apache2 port 80 configuration...
    filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
-   sed -i -e 's/^/#/' file                                                    # Comment out the whole file - we don't want apache on port 80
+   sudo sed -i -e 's/^/#/' "$filename"                                        # Comment out the whole file - we don't want apache on port 80
    # Edit the Apache2 port 443 configuration
    filename='/etc/apache2/sites-available/default-ssl.conf'                   # File to be edited
    oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
