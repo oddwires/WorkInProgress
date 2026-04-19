@@ -119,24 +119,35 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-   tput setaf 9                                               # Reset to default text colour
-   sudo nginx -s stop                                         # Stop NGINX while we insatll Apache2
+   tput setaf 9                                                               # Reset to default text colour
+   sudo nginx -s stop                                                         # Stop NGINX while we insatll Apache2
    # Apache install...
    sudo apt-get install -y apache2 php
 
-   # edit the Apache2 default http web page...
-   # filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
-   # oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
-   # newstring='DocumentRoot /var/www'                                          # ... with this one
-   # sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+   # Apache2 needs to connect to port 443 ONLY. This provides the alarm-system web interface.
+   # Edit the Apache2 port 80 configuration...
+   filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
+   sed -i -e 's/^/#/' file                                                    # Comment out the whole file - we don't want apache on port 80
+   # Edit the Apache2 port 443 configuration
+   filename='/etc/apache2/sites-available/default-ssl.conf'                   # File to be edited
+   oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
+   newstring='DocumentRoot /var/www'                                          # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # Port 443 now points to the alarm-service web page
 
-   sudo cp -v ./ConfigFiles/000-default.conf /etc/apache2/                      # Prevent Apache2 from using port 80
-   sudo cp ./ConfigFiles/nginx.conf /etc/nginx/                                 # Prevent NGINX from using port 80
+   # NGINX needs to connect to port 80 ONLY. This provides the Homebridge web interface.
+   # Edit the NGINX port 443 configuration...
+   filename='/etc/nginx/sites-available/homebridge.local'                     # File to be edited
+   oldstring='  listen 443 ssl http2;'                                        # need to replace this string...
+   newstring='# listen 443 ssl http2;'                                        # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+   oldstring='  listen [::]:443 ssl http2;'                                   # need to replace this string...
+   newstring='# listen [::]:443 ssl http2;'                                   # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # NGINX no longer conects to port 443
 
-   sudo service apache2 restart                                                 # Restart Apache2
-   sudo nginx -s reload                                                         # Restart NGINX
+   sudo service apache2 restart                                               # Restart Apache2
+   sudo nginx -s reload                                                       # Restart NGINX
 fi
-#read -n1 -r -p "Press any key to continue..." key
+read -n1 -r -p "Press any key to continue..." key
 
 clear
 tput setaf 2                                               # Green text
@@ -205,7 +216,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     # enable the service...
     sudo systemctl enable alarm
     # Start it up...
-    sudo service alarm start
+    # sudo service alarm start
 
     echo "Creating data directory structure..."
     mkdir /var/data
@@ -372,12 +383,12 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     cd $CurrentDir                                                            # back to where we started
 
     # create the virtual site...
-    sudo cp ./ConfigFiles/default-ssl.conf /etc/apache2/sites-available/
+    # sudo cp ./ConfigFiles/default-ssl.conf /etc/apache2/sites-available/
     sudo a2dissite 000-default.conf                                            # disable port 80 site
     sudo a2ensite default-ssl.conf                                             # enable web site
     sudo service apache2 restart                                               # load new certificate chain.
 fi
-#read -n1 -r -p "Press any key to continue..." key
+read -n1 -r -p "Press any key to continue..." key
 echo " "
 
 clear
@@ -555,9 +566,15 @@ echo "*                                                                         
 echo "*  The I2C bus has been reconfigured to operate at 32KHz, but requires a       *"
 echo "*  reboot to take effect.                                                      *"
 echo "*                                                                              *"
+echo "*  If you have a pre-existing configuration file (status.txt), it should be    *"
+echo "*  copied to the \data share now.                                              *"
+echo "*                                                                              *"
 echo "*  Press any key to exit the installer and reboot the system.                  *"
 echo "*                                                                              *"
 echo "********************************************************************************"
+# Allow config file to be updated over Samba network share.
+# Note: config file permissions are restored to 611 following the reboot.
+sudo chmod 755 /var/www/data/status.txt
 read -n1 -r key
 tput setaf 9                                               # Reset to default text colour
 echo
