@@ -140,8 +140,8 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    oldstring='  listen 443 ssl http2;'                                        # need to replace this string...
    newstring='# listen 443 ssl http2;'                                        # ... with this one
    sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
-   oldstring='  listen [::]:443 ssl http2;'                                   # need to replace this string...
-   newstring='# listen [::]:443 ssl http2;'                                   # ... with this one
+   oldstring='  listen \[::\]:443 ssl http2;'                                 # need to replace this string...
+   newstring='# listen \[::\]:443 ssl http2;'                                 # ... with this one
    sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # NGINX no longer conects to port 443
 
    sudo service apache2 restart                                               # Restart Apache2
