@@ -23,10 +23,8 @@ echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   tput setaf 9                                               # Reset to default text colour
   # Upgrades...
-  # sudo apt-get -y upgrade
-  # sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade     # mute the install dialogue
-  sudo DEBIAN_FRONTEND='noninteractive' apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' upgrade
-  sudo apt-get install build-essential
+  sudo apt-get -y upgrade
+  sudo apt-get -y install build-essential
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
@@ -147,7 +145,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    sudo service apache2 restart                                               # Restart Apache2
    sudo nginx -s reload                                                       # Restart NGINX
 fi
-read -n1 -r -p "Press any key to continue..." key
+#read -n1 -r -p "Press any key to continue..." key
 
 clear
 tput setaf 2                                               # Green text
@@ -199,9 +197,10 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     echo "Setting file permissions..."
     sudo find /var/www -type f -exec chmod 640 {} \;                        # change file permissions only
     sudo find /var/www/Scripts -type f -exec chmod 740 {} \;                # root can execute all files in this folder
-    echo "Grant user pi access to the web folder..."
+    echo "Grant current user access to the web folder..."
     usermod -aG www-data $CurrentUsr
-
+    echo "Grant homebridge service access to the web folder..."
+    usermod -aG www-data homebridge
     echo "Installing the alarm service..."
     # copy the scripts...
     sudo cp -vR ./Scripts/* /var/www/Scripts
@@ -388,7 +387,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     sudo a2ensite default-ssl.conf                                             # enable web site
     sudo service apache2 restart                                               # load new certificate chain.
 fi
-read -n1 -r -p "Press any key to continue..." key
+#read -n1 -r -p "Press any key to continue..." key
 echo " "
 
 clear
@@ -527,38 +526,6 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 9                              *"
-echo "*                                                                              *"
-echo "*  Configure Homebridge connector                                              *"
-echo "*                                                                              *"
-echo "*  Homebridge is a lightweight Node.js server you can run on your home         *"
-echo "*  network that emulates the iOS HomeKit API. It supports Plugins, which       *"
-echo "*  are community-contributed modules that provide a basic bridge from          *"
-echo "*  HomeKit to various 3rd-party APIs provided by manufacturers of              *"
-echo "*  "smart home" devices.                                                       *"
-echo "*                                                                              *"
-echo "* Full project details on GitHub https://github.com/homebridge/homebridge      *"
-echo "*                                                                              *"
-echo "*  Press 'I'      to Install                                                   *"
-echo "*        'S'      to Skip                                                      *"
-echo "*        'Ctrl+C' to Quit the installer                                        *"
-echo "*                                                                              *"
-echo "********************************************************************************"
-read -n1 -r key
-echo
-if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-  tput setaf 9                                               # Reset to default text colour
-  
-  sudo usermod -a -G www-data homebridge                     # Give Homebridge service 
-                                                             #  read/write access to alarm system data
-fi
-#read -n1 -r -p "Press any key to continue..." key
-echo " "
-
-clear
-tput setaf 2                                               # Green text
-echo "********************************************************************************"
-echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 10                             *"
 echo "*                                                                              *"
 echo "*  The alarm system has been installed.                                        *"
@@ -567,14 +534,13 @@ echo "*  The I2C bus has been reconfigured to operate at 32KHz, but requires a  
 echo "*  reboot to take effect.                                                      *"
 echo "*                                                                              *"
 echo "*  If you have a pre-existing configuration file (status.txt), it should be    *"
-echo "*  copied to the \data share now.                                              *"
+echo "*  copied to the 'web page\data\' share now.                                   *"
 echo "*                                                                              *"
 echo "*  Press any key to exit the installer and reboot the system.                  *"
 echo "*                                                                              *"
 echo "********************************************************************************"
 # Allow config file to be updated over Samba network share.
 # Note: config file permissions are restored to 611 following the reboot.
-sudo chmod 755 /var/www/data/status.txt
 read -n1 -r key
 tput setaf 9                                               # Reset to default text colour
 echo
