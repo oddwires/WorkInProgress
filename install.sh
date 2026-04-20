@@ -84,7 +84,7 @@ echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    tput setaf 9                                               # Reset to default text colour
    # Configure the I2C bus speed to 32K ( default is 100K and too fast for the PIC chip )
-   sudo fdtput --type u /boot/bcm2709-rpi-2-b.dtb /soc/i2c@7e205000 clock-frequency 32000
+  #  sudo fdtput --type u /boot/bcm2709-rpi-2-b.dtb /soc/i2c@7e205000 clock-frequency 32000
    # install the I2C utilities...
    sudo apt-get install -y i2c-tools
    # set start up parameters ( requires reboot to take effect ) ...
@@ -124,6 +124,26 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
 
    # Apache2 needs to connect to port 443 ONLY. This provides the alarm-system web interface.
    # Edit the Apache2 port 80 configuration...
+   filename='/etc/apache2/ports.conf'                                         # File to be edited
+   oldstring='Listen 80'                                                      # need to replace this string...
+   newstring='# Listen 80'                                                    # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"
+
+   filename='/etc/apache2/sites-available/default-ssl.conf'                   # File to be edited
+   oldstring='/etc/ssl/certs/ssl-cert-snakeoil.pem'                           # need to replace this string...
+   newstring='/var/ca/server/Certificate.crt'                                 # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"
+   
+   filename='/etc/apache2/sites-available/default-ssl.conf'                   # File to be edited
+   oldstring='/etc/ssl/private/ssl-cert-snakeoil.key'                         # need to replace this string...
+   newstring='/var/ca/server/Certificate.key'                                 # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"
+
+   filename='/etc/apache2/sites-available/default-ssl.conf'                   # File to be edited
+   oldstring='#SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire'      # need to replace this string...
+   newstring='SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire'       # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"
+  
    filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
    sudo sed -i -e 's/^/#/' "$filename"                                        # Comment out the whole file - we don't want apache on port 80
    # Edit the Apache2 port 443 configuration
