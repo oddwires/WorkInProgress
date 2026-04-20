@@ -8,7 +8,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  Alarm system installer: Stage 1                                             *"
+echo "*  Alarm System installer: Stage 1                                             *"
 echo "*                                                                              *"
 echo "*  Install Debian upgrades.                                                    *"
 echo "*  ( this can take a long time to run )                                        *"
