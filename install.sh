@@ -541,6 +541,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
+sudo hb-service add homebridge-plugin-command@1.0.6        # Add the Homebridge plugin required by the Alarm-System
 
 clear
 tput setaf 2                                               # Green text
@@ -559,8 +560,6 @@ echo "*                                                                         
 echo "*  Press any key to exit the installer and reboot the system.                  *"
 echo "*                                                                              *"
 echo "********************************************************************************"
-# Allow config file to be updated over Samba network share.
-# Note: config file permissions are restored to 611 following the reboot.
 read -n1 -r key
 tput setaf 9                                               # Reset to default text colour
 echo
