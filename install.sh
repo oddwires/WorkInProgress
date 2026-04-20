@@ -8,7 +8,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 1                              *"
+echo "*  Alarm system installer: Stage 1                                             *"
 echo "*                                                                              *"
 echo "*  Install Debian upgrades.                                                    *"
 echo "*  ( this can take a long time to run )                                        *"
@@ -33,7 +33,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 2                              *"
+echo "*  Alarm System installer: Stage 2                                             *"
 echo "*                                                                              *"
 echo "*  Install Postfix Mail Transfer Agent.                                        *"
 echo "*                                                                              *"
@@ -66,7 +66,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 3                              *"
+echo "*  Alarm System installer: Stage 3                                             *"
 echo "*                                                                              *"
 echo "*  Install I2C Tools.                                                          *"
 echo "*                                                                              *"
@@ -103,7 +103,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 4                              *"
+echo "*  Alarm System installer: Stage 4                                             *"
 echo "*                                                                              *"
 echo "*  Install Apache and PHP.                                                     *"
 echo "*                                                                              *"
@@ -171,7 +171,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 5                              *"
+echo "*  Alarm System installer: Stage 5                                             *"
 echo "*                                                                              *"
 echo "*  Install alarm web page.                                                     *"
 echo "*                                                                              *"
@@ -256,7 +256,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 6                              *"
+echo "*  Alarm System installer: Stage 6                                             *"
 echo "*                                                                              *"
 echo "*  Create a certificate chain and configure Apache to use HTTPS.               *"
 echo "*                                                                              *"
@@ -414,7 +414,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 7                              *"
+echo "*  Alarm System installer: Stage 7                                             *"
 echo "*                                                                              *"
 echo "*  Install Samba.                                                              *"
 echo "*                                                                              *"
@@ -494,7 +494,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 8                              *"
+echo "*  Alarm System installer: Stage 8                                             *"
 echo "*                                                                              *"
 echo "*  Install and configure Fail2Ban                                              *"
 echo "*                                                                              *"
@@ -546,7 +546,7 @@ clear
 tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 10                             *"
+echo "* Alarm System installer: Stage 10                                             *"
 echo "*                                                                              *"
 echo "*  The alarm system has been installed.                                        *"
 echo "*                                                                              *"
