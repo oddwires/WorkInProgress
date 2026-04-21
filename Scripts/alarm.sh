@@ -121,12 +121,14 @@ Homebridge_Export()
 #################################################################################################################################
 {  ConfigDotJsonPath="/var/lib/homebridge/"
    PersistPath="/var/lib/homebridge/persist/"
-   ConfigDotJsonFilename="config.json"                                  # Change name to Debug
+   ConfigDotJsonFilename="config.json"                                                      # Change name to Debug
 
    # extract various details for Homebridge...
    BridgeMAC=$(grep -n "username" /var/lib/homebridge/config.json | awk -F'"' '{print $4}')
-   JSONheader="$(head -9 /var/lib/homebridge/config.json)"              # Read header from existing config.json
-   JSONfooter="$(tail -9 /var/lib/homebridge/config.json)"              # Read header from existing config.json
+   JSONheader="$(head -8 /var/lib/homebridge/config.json)"$'\n'
+   JSONheader+="     "\"accessories"\": ["                                                  # Read header from existing config.json
+   JSONfooter="     ],"$'\n'
+   JSONfooter+="$(tail -8 /var/lib/homebridge/config.json)"                                 # Read footer from existing config.json
 
    # Remove existing config file...
    rm -f $ConfigDotJsonPath$ConfigDotJsonFilename
