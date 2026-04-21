@@ -95,12 +95,7 @@ Logon using the local user account.
 </table>
 
 ## Issues
-1) NGINX isn't playing nice with Apache2. Both want to grab port 80. The current fix is...   
-  nginx -s stop                      # Stop NGINX - This releases port 80   
-  sudo service apache2 restart               # Apache2 grabs port 80   
-  nginx -s reload                     # Restart NGINX - an error is logged about port 80, but it continues to run
-2) NPM install won't run as default user.   
-3) Install script crashes when installing self signed certificate.   
+   None - but I'm running it for a while because I'm sure there are some in there somehere. 
 
 ## Useful file locations:-
 
