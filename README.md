@@ -112,6 +112,8 @@ http:\/\/\<ip address>:8581/          Homebridge console
   SAMBA                 /var/log/samba/log.smbd  
                              /etc/samba/smb.conf   
 
+Use port 587 (TLS) to connect to Gmail servers
+
 sudo netstat -plnt   
 sudo hb-config   
 
