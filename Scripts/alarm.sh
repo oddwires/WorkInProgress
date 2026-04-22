@@ -430,9 +430,9 @@ eMail()
 
         # Gather the system info...
         SETUP_localIP=$(hostname -I)
-        SETUP_diskused=$(df -h | grep root | awk '{print $3}')
-        SETUP_diskperc=$(df -h | grep root | awk '{print $5}')
-        SETUP_disktotal=$(df -h | grep root | awk '{print $2}')
+        SETUP_diskused=$(df -h --total | grep total | awk '{print $3}')
+        SETUP_diskperc=$(df -h --total | grep total | awk '{print $5}')
+        SETUP_disktotal=$(df -h --total | grep total | awk '{print $2}')
         tmp=$(cat /proc/meminfo | grep MemTotal | awk '{print $2}')                     # in KB
         memory=$((tmp /1024))' MB'                                                      # convert to MB
         SYSTEM_uptime=$(uptime -p | cut -c 3-)
