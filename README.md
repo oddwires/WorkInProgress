@@ -30,7 +30,8 @@ Logon using the local user account.
 <blockquote style="font-weight: normal; background: #c0c0c0;">sudo raspi-config</blockquote>
 </td>
 <td>This starts the Raspberry Pi configuration utility. Select the following...<ul>
-<li>System options | set Hostname</li>
+<li>System options | Set Hostname</li>
+<li>Hardware options | Enable I2C</li>
 <li>Localisation Options | Configure lanuage and regional settings</li>
 <li>Localisation Options | Change Timezone</li>
 <li>Finish and Reboot</li></ul></td></tr>
@@ -91,6 +92,9 @@ Logon using the local user account.
 </td>
 <td>Run the install script.</td>
 </tr>
+  <tr><td colspan="3">or if you want to copy/paste all of the above in one go, here it is all in one line...<br><br>
+sudo sudo apt-get update && mkdir Downloads && cd Downloads && git clone https://github.com/oddwires/WorkInProgress.git && sudo mv WorkInProgress alarm-system && cd alarm-system && chmod +x install.sh && sudo ./install.sh
+</td></tr>
 </tbody>
 </table>
 
